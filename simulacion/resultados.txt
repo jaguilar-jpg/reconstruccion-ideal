@@ -1,0 +1,33 @@
+CASO 1  Ts=1/4  fs=4 Hz  muestras=49  E_e=0.0001117  (0.0006 % de E_x=18)
+CASO 2  Ts=1/sqrt(2)  fs=1.4142 Hz  muestras=113  E_e=32.04  (178.0 % de E_x)
+        frecuencia alias esperada = |F0 - round(F0/fs)*fs| = 0.4142 Hz
+        frecuencia medida en x_r(t) = 0.4140 Hz, amplitud = 3.000
+CASO 3  Ts=1/4  muestras=5  E_e=11.05  (61.4 % de E_x)
+
+TABLA A  Energía del error vs muestras usadas (ventana [-2,2], x(t)=3cos(2 pi t))
+   T (s)    fs (Hz)       muestras            E_e
+     0.5          4              5          11.05
+       1          4              9          6.937
+       2          4             17        0.02227
+       4          4             33      0.0006072
+       6          4             49      0.0001117
+      12          4             97      6.936e-06
+      24          4            193      4.417e-07
+      48          4            385      2.803e-08
+     0.5        2.5              3          7.248
+       1        2.5              5          5.774
+       2        2.5             11         0.0328
+       4        2.5             21      1.094e-05
+       6        2.5             31      3.959e-05
+      12        2.5             61      8.304e-06
+      24        2.5            121      8.021e-07
+      48        2.5            241      6.082e-08
+
+TABLA B  Energía del error vs fs (muestras de -6 s a 6 s)
+   fs (Hz)    fs > 2B ?   muestras            E_e     % de E_x
+     1.414           NO         17          32.29      179.398
+     2.500           si         31      3.959e-05        0.000
+     3.000           si         37      0.0001414        0.001
+     4.000           si         49      0.0001117        0.001
+     6.000           si         73      5.525e-05        0.000
+     8.000           si         97      3.198e-05        0.000

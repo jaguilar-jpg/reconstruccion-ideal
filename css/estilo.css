@@ -185,3 +185,7 @@ body, .reveal-viewport { background: var(--bg); }
 .portada .etq { color: var(--azul); font-size: .8em; margin: 1.1em 0 .2em; }
 .portada .integrantes { font-size: .8em; line-height: 1.55; color: var(--texto); margin: 0; }
 .resumen-img { width: 100%; border-radius: 8px; border: 1px solid var(--linea); display: block; }
+.graf .gtit { font-size: .66em; color: var(--texto); margin: 0 0 .1em 4px; }
+.graf .gtit .katex { font-size: 1.1em; }
+.graf .gtit { font-size: .85em; margin: 0 0 .15em 0; text-align: center; }
+.graf .gtit .katex { font-size: 1.25em; }

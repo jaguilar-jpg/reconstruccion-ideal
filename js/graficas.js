@@ -21,13 +21,27 @@
   }
 
   function texto(svg, x, y, t, color, ancla, tam) {
+    tam = tam || 17;
+    if (t.indexOf('\\(') >= 0) {            // texto con LaTeX -> lo dibuja KaTeX
+      const w = 240, a = ancla || 'middle';
+      const x0 = a === 'start' ? x : a === 'end' ? x - w : x - w / 2;
+      const fo = el('foreignObject', { x: x0, y: y - tam * 1.05, width: w, height: tam * 1.8 }, svg);
+      const d = document.createElement('div');
+      d.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+      d.style.cssText = 'font-size:' + tam + 'px;line-height:1.3;white-space:nowrap;color:' + (color || C.texto) +
+        ';text-align:' + (a === 'middle' ? 'center' : a === 'end' ? 'right' : 'left');
+      d.textContent = t;
+      fo.appendChild(d);
+      return fo;
+    }
     const e = el('text', {
-      x: x, y: y, fill: color || C.texto, 'text-anchor': ancla || 'middle',
-      'font-size': tam || 17, 'font-family': 'Segoe UI, system-ui, Arial, sans-serif'
+      x: x, y: y, fill: color || C.texto, 'text-anchor': a2(ancla),
+      'font-size': tam, 'font-family': 'Segoe UI, system-ui, Arial, sans-serif'
     }, svg);
     e.textContent = t;
     return e;
   }
+  function a2(a) { return a || 'middle'; }
 
   /* Reconstrucción con sincs: x_r(t) = Σ x(kTs) sinc((t - kTs)/Ts) */
   function reconstruir(x, Ts, K) {
@@ -43,14 +57,19 @@
   /* Gráfica general */
   function plot(cont, cfg) {
     const W = cfg.w || 600, H = cfg.h || 290;
-    const L = 30, R = 22, T = cfg.titulo ? 34 : 16, B = 36;
+    const L = 30, R = 22, T = 16, B = 36;
     const [x0, x1] = cfg.x, [y0, y1] = cfg.y;
     const X = (x) => L + ((x - x0) / (x1 - x0)) * (W - L - R);
     const Y = (y) => T + ((y1 - y) / (y1 - y0)) * (H - T - B);
 
-    const svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': cfg.titulo || 'gráfica' }, cont);
+    const svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'gráfica' }, cont);
 
-    if (cfg.titulo) texto(svg, L + 4, 22, cfg.titulo, C.texto, 'start', 18);
+    if (cfg.titulo) {
+      const tt = document.createElement('div');
+      tt.className = 'gtit';
+      tt.textContent = cfg.titulo;
+      cont.insertBefore(tt, svg);
+    }
 
     // ejes
     el('line', { x1: X(x0), y1: Y(0), x2: X(x1), y2: Y(0), stroke: C.eje, 'stroke-width': 1.8 }, svg);
@@ -105,12 +124,12 @@
     // marcas en el eje
     (cfg.marcas || []).forEach((m) => {
       el('line', { x1: X(m.x), y1: Y(0) - 4, x2: X(m.x), y2: Y(0) + 4, stroke: C.eje, 'stroke-width': 1.6 }, svg);
-      if (m.t) texto(svg, X(m.x), H - 10, m.t, C.gris, 'middle', 16);
+      if (m.t) texto(svg, X(m.x), H - 10, m.t, C.gris, 'middle', 20);
     });
 
     // etiquetas libres (en coordenadas de datos)
     (cfg.etiquetas || []).forEach((e) => {
-      texto(svg, X(e.x), Y(e.y), e.t, e.color || C.texto, e.ancla || 'middle', e.tam || 17);
+      texto(svg, X(e.x), Y(e.y), e.t, e.color || C.texto, e.ancla || 'middle', e.tam || 21);
     });
 
     return svg;
@@ -143,15 +162,15 @@
     const cfg = {
       x: [-xr, xr], y: [-0.18, 1.35], series: series,
       marcas: [
-        { x: 0, t: '0' }, { x: fs, t: 'fs' }, { x: -fs, t: '−fs' }, { x: B, t: 'B' }, { x: -B, t: '−B' }
+        { x: 0, t: '0' }, { x: fs, t: '\\(f_s\\)' }, { x: -fs, t: '\\(-f_s\\)' }, { x: B, t: '\\(B\\)' }, { x: -B, t: '\\(-B\\)' }
       ],
-      titulo: modo === 'replicas' ? 'X_m(f) = fs · Σ X(f − k·fs)'
-        : modo === 'filtro' ? 'Y(f) = X_m(f) · H(f)'
-          : 'fs < 2B: las réplicas se solapan'
+      titulo: modo === 'replicas' ? '\\(X_m(f)=f_s\\sum_{k}X(f-kf_s)\\)'
+        : modo === 'filtro' ? '\\(Y(f)=X_m(f)\\,H(f)\\)'
+          : '\\(f_s\\lt2B\\): las réplicas se solapan'
     };
     if (modo === 'filtro') {
       cfg.rects = [{ x0: -fs / 2, x1: fs / 2, y0: 0, y1: 1.2, color: C.naranja, relleno: 0.12 }];
-      cfg.etiquetas = [{ x: fs / 2 + 0.05, y: 1.25, t: 'H(f) = Ts', color: C.naranja, ancla: 'start' }];
+      cfg.etiquetas = [{ x: fs / 2 + 0.05, y: 1.25, t: '\\(H(f)=T_s\\)', color: C.naranja, ancla: 'start' }];
     }
     if (modo === 'solape') {
       cfg.etiquetas = [
@@ -164,43 +183,43 @@
   /* ---------- Definición de cada gráfica ---------- */
   const G = {
     'rect-t': (c) => plot(c, {
-      x: [-2, 2], y: [-0.3, 1.45], titulo: 's(t) = A · rect_T(t)',
+      x: [-2, 2], y: [-0.3, 1.45], titulo: '\\(s(t)=A\\,\\mathrm{rect}_T(t)\\)',
       series: [{ pts: [[-2, 0], [-0.5, 0], [-0.5, 1], [0.5, 1], [0.5, 0], [2, 0]], color: C.azul, ancho: 4 }],
-      marcas: [{ x: -0.5, t: '−T/2' }, { x: 0.5, t: 'T/2' }],
+      marcas: [{ x: -0.5, t: '\\(-T/2\\)' }, { x: 0.5, t: '\\(T/2\\)' }],
       etiquetas: [{ x: -0.62, y: 1, t: 'A', color: C.amarillo, ancla: 'end' }]
     }),
 
     'sinc-f': (c) => plot(c, {
-      x: [-5, 5], y: [-0.4, 1.3], titulo: 'S(f) = A·T·sinc(fT)',
+      x: [-5, 5], y: [-0.4, 1.3], titulo: '\\(S(f)=AT\\,\\mathrm{sinc}(fT)\\)',
       series: [{ f: sinc, color: C.naranja, ancho: 3.5, n: 700 }],
       marcas: [
-        { x: -3, t: '−3/T' }, { x: -2, t: '−2/T' }, { x: -1, t: '−1/T' }, { x: 1, t: '1/T' }, { x: 2, t: '2/T' }, { x: 3, t: '3/T' }
+        { x: -3, t: '\\(-3/T\\)' }, { x: -2, t: '\\(-2/T\\)' }, { x: -1, t: '\\(-1/T\\)' }, { x: 1, t: '\\(1/T\\)' }, { x: 2, t: '\\(2/T\\)' }, { x: 3, t: '\\(3/T\\)' }
       ],
-      etiquetas: [{ x: 0.35, y: 1.16, t: 'A·T', color: C.amarillo, ancla: 'start' }]
+      etiquetas: [{ x: 0.35, y: 1.16, t: '\\(AT\\)', color: C.amarillo, ancla: 'start' }]
     }),
 
     'sinc-t': (c) => plot(c, {
-      x: [-5, 5], y: [-0.4, 1.3], titulo: 'S(t) = A·T·sinc(tT)',
+      x: [-5, 5], y: [-0.4, 1.3], titulo: '\\(S(t)=AT\\,\\mathrm{sinc}(tT)\\)',
       series: [{ f: sinc, color: C.naranja, ancho: 3.5, n: 700 }],
       marcas: [
-        { x: -2, t: '−2/T' }, { x: -1, t: '−1/T' }, { x: 1, t: '1/T' }, { x: 2, t: '2/T' }
+        { x: -2, t: '\\(-2/T\\)' }, { x: -1, t: '\\(-1/T\\)' }, { x: 1, t: '\\(1/T\\)' }, { x: 2, t: '\\(2/T\\)' }
       ],
-      etiquetas: [{ x: 0.35, y: 1.16, t: 'A·T', color: C.amarillo, ancla: 'start' }]
+      etiquetas: [{ x: 0.35, y: 1.16, t: '\\(AT\\)', color: C.amarillo, ancla: 'start' }]
     }),
 
     'rect-f': (c) => plot(c, {
-      x: [-2, 2], y: [-0.3, 1.45], titulo: 's(−f) = A · rect_T(f)',
+      x: [-2, 2], y: [-0.3, 1.45], titulo: '\\(s(-f)=A\\,\\mathrm{rect}_T(f)\\)',
       series: [{ pts: [[-2, 0], [-0.5, 0], [-0.5, 1], [0.5, 1], [0.5, 0], [2, 0]], color: C.azul, ancho: 4 }],
-      marcas: [{ x: -0.5, t: '−T/2' }, { x: 0.5, t: 'T/2' }],
+      marcas: [{ x: -0.5, t: '\\(-T/2\\)' }, { x: 0.5, t: '\\(T/2\\)' }],
       etiquetas: [{ x: -0.62, y: 1, t: 'A', color: C.amarillo, ancla: 'end' }]
     }),
 
     'tri-copias': (c) => {
       const copia = (k, color, dash) => ({ pts: [[3 * k, 0], [3 * k + 1, 1], [3 * k + 2, 0]], color: color, ancho: 3.5, dash: dash });
       plot(c, {
-        x: [-1, 9], y: [-0.3, 1.4], titulo: 'x(t) ∗ Σ δ(t − k·t₀)',
+        x: [-1, 9], y: [-0.3, 1.4], titulo: '\\(x(t)*\\sum_k\\delta(t-kt_0)\\)',
         series: [copia(0, C.azul), copia(1, C.naranja), copia(2, C.naranja)],
-        marcas: [{ x: 0, t: '0' }, { x: 3, t: 't₀' }, { x: 6, t: '2t₀' }]
+        marcas: [{ x: 0, t: '0' }, { x: 3, t: '\\(t_0\\)' }, { x: 6, t: '\\(2t_0\\)' }]
       });
     },
 
@@ -216,28 +235,28 @@
         marcas.push({ x: k, t: k === 0 ? '0' : (k === 1 ? 'Ts' : k === -1 ? '−Ts' : k + 'Ts') });
       }
       plot(c, {
-        x: [-4.6, 4.6], y: [-0.4, 1.3], titulo: 'h(t) = sinc(t/Ts)',
+        x: [-4.6, 4.6], y: [-0.4, 1.3], titulo: '\\(h(t)=\\mathrm{sinc}(t/T_s)\\)',
         series: [{ f: sinc, color: C.azul, ancho: 3.5, n: 700 }],
         puntos: puntos, marcas: marcas
       });
     },
 
     'interp2': (c) => plot(c, {
-      x: [-4.6, 4.6], y: [-0.5, 1.35], titulo: 'dos muestras: x(0) = 1 y x(Ts) = 0,6',
+      x: [-4.6, 4.6], y: [-0.5, 1.35], titulo: 'dos muestras: \\(x(0)=1\\) y \\(x(T_s)=0{,}6\\)',
       series: [
         { f: sinc, color: C.azul, ancho: 2.5, opacidad: 0.8 },
         { f: (t) => 0.6 * sinc(t - 1), color: C.naranja, ancho: 2.5, dash: '9 6' },
         { f: (t) => sinc(t) + 0.6 * sinc(t - 1), color: C.amarillo, ancho: 4.5 }
       ],
       puntos: [{ x: 0, y: 1, color: C.texto, r: 7 }, { x: 1, y: 0.6, color: C.texto, r: 7 }],
-      marcas: [{ x: -2, t: '−2Ts' }, { x: -1, t: '−Ts' }, { x: 0, t: '0' }, { x: 1, t: 'Ts' }, { x: 2, t: '2Ts' }, { x: 3, t: '3Ts' }]
+      marcas: [{ x: -2, t: '\\(-2T_s\\)' }, { x: -1, t: '\\(-T_s\\)' }, { x: 0, t: '0' }, { x: 1, t: '\\(T_s\\)' }, { x: 2, t: '\\(2T_s\\)' }, { x: 3, t: '\\(3T_s\\)' }]
     }),
 
     'alias-t': (c) => {
       const puntos = [];
       for (let n = 0; n <= 4; n++) puntos.push({ x: n / 4, y: Math.cos(Math.PI * n / 2), color: C.amarillo, r: 7 });
       plot(c, {
-        x: [0, 1], y: [-1.5, 1.5], titulo: 'fs = 4 Hz: cos(2πt) y cos(2π·3t)',
+        x: [0, 1], y: [-1.5, 1.5], titulo: '\\(f_s=4\\) Hz: \\(\\cos(2\\pi t)\\) y \\(\\cos(2\\pi\\cdot3t)\\)',
         series: [
           { f: (t) => Math.cos(2 * Math.PI * t), color: C.azul, ancho: 3.5 },
           { f: (t) => Math.cos(2 * Math.PI * 3 * t), color: C.naranja, ancho: 3, dash: '10 6' }
@@ -254,7 +273,7 @@
       const puntos = [];
       for (let k = -4; k <= 8; k++) puntos.push({ x: k * Ts, y: x(k * Ts), color: C.amarillo, r: 6 });
       plot(c, {
-        x: [-1, 2], y: [-4, 4], titulo: 'x(t) = 3cos(2πt), Ts = 1/4',
+        x: [-1, 2], y: [-4, 4], titulo: '\\(x(t)=3\\cos(2\\pi t),\\ T_s=\\tfrac14\\)',
         series: [
           { f: x, color: C.azul, ancho: 4 },
           { f: xr, color: C.naranja, ancho: 2.5, dash: '9 6', n: 600 }
@@ -271,7 +290,7 @@
       const puntos = [];
       for (let k = -3; k <= 5; k++) puntos.push({ x: k * Ts, y: x(k * Ts), color: C.amarillo, r: 6 });
       plot(c, {
-        x: [-1, 3], y: [-4, 4], titulo: 'Ts = 1/√2 (fs ≈ 1,41 Hz)',
+        x: [-1, 3], y: [-4, 4], titulo: '\\(T_s=\\tfrac{1}{\\sqrt2},\\ f_s\\approx1{,}41\\text{ Hz}\\)',
         series: [
           { f: x, color: C.azul, ancho: 3.5 },
           { f: xr, color: C.naranja, ancho: 3, dash: '9 6', n: 700 }

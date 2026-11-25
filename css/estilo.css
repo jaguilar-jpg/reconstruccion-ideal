@@ -189,3 +189,11 @@ body, .reveal-viewport { background: var(--bg); }
 .graf .gtit .katex { font-size: 1.1em; }
 .graf .gtit { font-size: .85em; margin: 0 0 .15em 0; text-align: center; }
 .graf .gtit .katex { font-size: 1.25em; }
+/* leyendas de las gráficas */
+.gleyenda { display: flex; flex-wrap: wrap; gap: .15em 1.1em; font-size: .62em; color: var(--texto); margin: .3em 0 0 4px; line-height: 1.35; }
+.gl { display: inline-flex; align-items: center; gap: .45em; }
+.sw { display: inline-block; flex: none; }
+.sw.linea { width: 26px; height: 4px; border-radius: 2px; background: var(--c); }
+.sw.dash { width: 26px; height: 0; border-top: 4px dashed var(--c); }
+.sw.punto { width: 12px; height: 12px; border-radius: 50%; background: var(--c); }
+.sw.caja { width: 18px; height: 14px; border-radius: 3px; background: var(--c); opacity: .7; }

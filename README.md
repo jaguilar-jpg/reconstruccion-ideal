@@ -25,7 +25,7 @@ Estructura de la exposición: fundamentos matemáticos, ejemplo desarrollado, si
 ## Estructura
 
 ```
-index.html        # las 12 diapositivas (portada + 11)
+index.html        # las 12 diapositivas
 css/estilo.css    # estilo oscuro, parecido al de las diapositivas del ingeniero
 js/graficas.js    # gráficas SVG (espectros, sinc, aliasing)
 js/main.js        # arranque de reveal.js (+ plugin KaTeX)
@@ -33,12 +33,14 @@ lib/reveal/       # reveal.js 5 (copia local)
 lib/katex/dist/   # KaTeX 0.16 (copia local, para las fórmulas)
 ```
 
-## Simulación en Python (diapositivas 11 y 12)
+## Contenido (12 diapositivas)
 
-`simulacion/reconstruccion_sinc.py` reconstruye `x(t) = 3cos(2πt)` con la suma de sincs, mide la energía del error y genera las figuras (`simulacion/figuras/`) y `simulacion/resultados.txt`.
+1. Portada
+2-3. Reconstrucción ideal: réplicas del espectro y filtro paso bajo ideal
+4-5. Interpolación sinc: dualidad y fórmula de Whittaker-Shannon
+6. Ejemplo numérico: x_r(1/8)
+7. Reconstrucción perfecta: condiciones de Nyquist-Shannon
+8-10. Errores: aliasing, truncamiento e interpolación lineal
+11-12. Ejercicio tipo examen y su solución
 
-```
-pip install numpy matplotlib
-python simulacion/reconstruccion_sinc.py
-```
-También se puede pegar en Google Colab (las líneas `# %%` separan las celdas).
+`simulacion/` contiene el script de Python usado para comprobar los valores (material extra, no se presenta).

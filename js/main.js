@@ -10,7 +10,7 @@ Reveal.initialize({
   slideNumber: 'c/t',
   transition: 'fade',
   transitionSpeed: 'fast',
-  center: false,
+  center: true,
   plugins: [RevealMath.KaTeX],
   katex: { local: 'lib/katex' }
 });

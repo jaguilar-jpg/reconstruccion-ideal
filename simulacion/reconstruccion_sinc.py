@@ -189,6 +189,32 @@ fig.tight_layout()
 fig.savefig(FIGURAS / "error_vs_muestras.png", dpi=140)
 plt.close(fig)
 
+# %% Figura resumen de los tres casos (la que se usa en la diapositiva de resultados)
+fig, ejes = plt.subplots(1, 3, figsize=(13.5, 3.6), sharey=True)
+paneles = [
+    (c1, "Caso 1 · fs = 4 Hz (49 muestras)", "E_e = 1,12$\\times$10$^{-4}$  (0,0006 %)", None),
+    (c2, "Caso 2 · fs = 1,41 Hz (aliasing)", "E_e = 32,0  (178 %)", esperado),
+    (c3, "Caso 3 · fs = 4 Hz, solo 5 muestras", "E_e = 11,05  (61,4 %)", None),
+]
+for ax, (r, titulo, sub, ext) in zip(ejes, paneles):
+    ax.plot(r["t"], x(r["t"]), color=AZUL, lw=2.4, label="x(t)")
+    ax.plot(r["t"], r["xr"], color=NARANJA, lw=2.0, ls="--", label="x_r(t)")
+    if ext is not None:
+        ax.plot(r["t"], ext, color=TEXTO, lw=1.2, ls=":", label="alias esperado")
+    en = (r["tk"] >= VENTANA[0]) & (r["tk"] <= VENTANA[1])
+    ax.plot(r["tk"][en], r["xk"][en], "o", color=AMARILLO, ms=6, label="muestras")
+    ax.set_ylim(-4.4, 4.4)
+    ax.grid(True)
+    ax.set_xlabel("t (s)")
+    ax.set_title(titulo, loc="left", fontsize=12, color=AZUL)
+    ax.text(0.02, 0.04, sub, transform=ax.transAxes, fontsize=11, color=VERDE,
+            bbox=dict(facecolor=FONDO, edgecolor="none", alpha=0.85, pad=2))
+ejes[0].set_ylabel("amplitud")
+ejes[0].legend(loc="upper right", fontsize=9, ncol=2, facecolor=FONDO, edgecolor=EJE)
+fig.tight_layout()
+fig.savefig(FIGURAS / "resumen.png", dpi=140)
+plt.close(fig)
+
 # %% Guardar resultados
 texto = "\n".join(lineas)
 (CARPETA / "resultados.txt").write_text(texto + "\n", encoding="utf-8")

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Reconstrucción ideal de señales muestreadas · Señales y Sistemas</title>
+  <title>Reconstrucción ideal de señales muestreadas</title>
   <link rel="stylesheet" href="lib/reveal/reset.css">
   <link rel="stylesheet" href="lib/reveal/reveal.css">
   <link rel="stylesheet" href="lib/reveal/theme/black.css">
@@ -16,568 +16,250 @@
 
 <!-- 1 · PORTADA -->
 <section class="portada">
-  <p class="sup">Señales y Sistemas · Exposición</p>
-  <hr>
   <h1>Reconstrucción ideal de señales muestreadas</h1>
   <p class="sub">Interpolación sinc, reconstrucción perfecta y errores de reconstrucción</p>
-  <p class="autor">[Nombre del expositor] · Universidad Nacional de San Agustín</p>
-  <aside class="notes">
-    Presentación del tema. Hilo conductor: no usamos nada nuevo. Todo sale de lo que el ingeniero ya enseñó: la transformada del rectángulo, la dualidad, la convolución con deltas, el muestreo del Ejemplo 9 y el aliasing. La pregunta es: ¿cómo volvemos de las muestras a la señal original?
-  </aside>
+  <p class="curso">Señales y Sistemas · UNSA</p>
+  <p class="etq"><b>Integrantes</b></p>
+  <p class="integrantes">
+    Huallpa Huaraca Bily Jhaison<br>
+    Naventa Huachani John Antony<br>
+    Aguilar Mamani Jean Carlo Moises<br>
+    Bellido Márquez Fernando Aldair
+  </p>
 </section>
 
-<!-- CONTENIDO -->
+<!-- 2 · MUESTREO -->
 <section>
-  <h2><small>Contenido</small>Qué vamos a ver</h2>
-  <div class="tarjetas" style="grid-template-columns:repeat(4,1fr)">
-    <div class="tarjeta fragment"><h3>1 · Fundamentos matemáticos</h3><p>Muestreo, filtro rectangular, dualidad y suma de sincs.</p></div>
-    <div class="tarjeta naranja fragment"><h3>2 · Ejemplo desarrollado</h3><p>\(x(t)=3\cos(2\pi t)\) a mano, con \(T_s=1/4\) y con \(T_s=1/\sqrt2\).</p></div>
-    <div class="tarjeta verde fragment"><h3>3 · Simulación en Python</h3><p>Código, figuras y energía del error.</p></div>
-    <div class="tarjeta roja fragment"><h3>4 · Interpretación de resultados</h3><p>Qué significan los números y de dónde viene el error.</p></div>
-  </div>
-  <aside class="notes">Las cuatro partes que pidió el ingeniero: fundamentos, ejemplo desarrollado, simulación en Python e interpretación de resultados.</aside>
-</section>
-
-<!-- 2 · RUTA -->
-<section>
-  <h2><small>Fundamentos matemáticos · punto de partida</small>Lo que ya vimos en clase y vamos a usar</h2>
-  <table>
-    <tr><th>Herramienta de clase</th><th>Dónde</th><th>Para qué la usamos hoy</th></tr>
-    <tr class="fragment"><td>Muestreo: \(x(t)\sum_k\delta(t-kT_s)\)</td><td>Cap. 3 · Ej. 9</td><td>Punto de partida</td></tr>
-    <tr class="fragment"><td>TF del rectángulo: \(S(f)=A\,T\,\sinc(fT)\)</td><td>Cap. 2</td><td>El filtro ideal</td></tr>
-    <tr class="fragment"><td>Dualidad: \(s(t)\TF S(f)\Rightarrow S(t)\TF s(-f)\)</td><td>Cap. 2</td><td>Pasar el filtro al tiempo</td></tr>
-    <tr class="fragment"><td>\(x(t)*\delta(t-t_0)=x(t-t_0)\)</td><td>Cap. 3 · Ej. 6–8</td><td>Interpolar con sincs</td></tr>
-    <tr class="fragment"><td>\(x(t)*h(t)\TF X(f)\,H(f)\)</td><td>Cap. 3</td><td>Filtrar en frecuencia</td></tr>
-    <tr class="fragment"><td>Aliasing: \(x_2[n]=x_1[n]\) porque \(e^{j2\pi n}=1\)</td><td>Cap. 1</td><td>Entender el primer error</td></tr>
-    <tr class="fragment"><td>Energía: \(E_s=\int s^2(t)\,dt\)</td><td>Cap. 1</td><td>Medir el error</td></tr>
-  </table>
-  <aside class="notes">
-    Mapa de la exposición. Cada fila es una herramienta que ya está en las diapositivas del ingeniero y la columna de la derecha dice dónde la vamos a usar. Si alguien pregunta "¿de dónde sale esto?", la respuesta está en esta tabla.
-  </aside>
-</section>
-
-<!-- 3 · REPASO 1: RECTÁNGULO -->
-<section>
-  <h2><small>Repaso 1 · Capítulo 2</small>Transformada de Fourier del rectángulo</h2>
+  <h2><small>Fundamentos · 1</small>Muestrear repite el espectro</h2>
   <div class="cols">
     <div>
-      <p>\(s(t)=A\,\rect_T(t)\), con \(A\) entre \(-T/2\) y \(T/2\):</p>
-      $$S(f)=\int_{-\infty}^{\infty}s(t)\,e^{-j2\pi f t}\,dt$$
-      <div class="caja fragment">$$S(f)=A\,T\,\sinc(fT)$$</div>
-      <p class="fragment nota">Con \(\sinc(x)=\dfrac{\sin(\pi x)}{\pi x}\), la definición de clase.</p>
-    </div>
-    <div>
-      <div class="graf" data-g="rect-t"></div>
-      <div class="graf fragment" data-g="sinc-f"></div>
-    </div>
-  </div>
-  <aside class="notes">
-    Resultado ya demostrado en clase: un rectángulo de ancho T y altura A tiene como transformada A·T·sinc(fT). Se anula en múltiplos de 1/T. Guardemos esta idea: rectángulo en un dominio, sinc en el otro.
-  </aside>
-</section>
-
-<!-- 4 · REPASO 2: DUALIDAD -->
-<section>
-  <h2><small>Repaso 2 · Capítulo 2</small>Dualidad: el rectángulo también puede estar en frecuencia</h2>
-  <div class="caja caja-azul">
-    $$s(t)\TF S(f)\quad\Longrightarrow\quad S(t)\TF s(-f)$$
-  </div>
-  <div class="cols">
-    <div>
-      <p>Si \(s(t)=A\,\rect_T(t)\) entonces \(S(f)=A\,T\,\sinc(fT)\)</p>
-      <p class="fragment">Aplicando la dualidad (y como el rectángulo es par):</p>
-      <div class="caja fragment">$$A\,T\,\sinc(tT)\TF A\,\rect_T(f)$$</div>
-      <p class="fragment nota">Es el mismo ejemplo que muestra el ingeniero con \(S(t)\) y \(s(-f)\).</p>
-    </div>
-    <div>
-      <div class="graf baja" data-g="sinc-t"></div>
-      <div class="graf baja fragment" data-g="rect-f"></div>
-    </div>
-  </div>
-  <aside class="notes">
-    La propiedad de dualidad de la clase: si s(t) tiene transformada S(f), entonces la función S(t) tiene transformada s(-f). Con el rectángulo, eso dice que una sinc en el tiempo corresponde a un rectángulo en frecuencia. Esta propiedad es la que nos va a dar la sinc de la interpolación.
-  </aside>
-</section>
-
-<!-- 5 · REPASO 3: CONVOLUCIÓN CON DELTAS -->
-<section>
-  <h2><small>Repaso 3 · Capítulo 3 · Ejemplos 6, 7 y 8</small>Convolucionar con impulsos copia la señal</h2>
-  <div class="cols">
-    <div>
-      <div class="caja">$$x(t)*\delta(t-t_0)=x(t-t_0)$$</div>
-      <p class="fragment">Con varios impulsos, se suma una copia por cada uno:</p>
-      <div class="caja fragment">$$x(t)*\sum_{k=-\infty}^{\infty}\delta(t-k\,t_0)=\sum_{k=-\infty}^{\infty}x(t-k\,t_0)$$</div>
-    </div>
-    <div class="graf fragment" data-g="tri-copias"></div>
-  </div>
-  <aside class="notes">
-    Ejemplos 6, 7 y 8 del ingeniero: convolucionar con un impulso desplazado desplaza la señal, y convolucionar con un tren de impulsos la repite. Lo vamos a usar dos veces: en frecuencia, para entender por qué el espectro se repite, y en el tiempo, para entender la interpolación con sincs.
-  </aside>
-</section>
-
-<!-- 6 · REPASO 4: CONVOLUCIÓN <-> PRODUCTO -->
-<section>
-  <h2><small>Repaso 4 · Capítulo 3</small>Convolución en un dominio, producto en el otro</h2>
-  <div class="bloques">
-    <span class="nodo">\(x(t)\)</span><span class="flecha">→</span>
-    <span class="nodo naranja">\(h(t)\)<br>\(H(f)\)</span><span class="flecha">→</span>
-    <span class="nodo">\(y(t)\)</span>
-  </div>
-  <div class="caja caja-azul">
-    $$y(t)=x(t)*h(t)\TF Y(f)=X(f)\,H(f)$$
-  </div>
-  <div class="caja fragment">
-    $$x(t)\,h(t)\TF X(f)*H(f)$$
-  </div>
-  <p class="fragment">\(H(f)\) es la respuesta en frecuencia del sistema: \(y(t)=\mathcal{F}^{-1}\{X(f)\,H(f)\}\).</p>
-  <aside class="notes">
-    Dos caras de la misma propiedad. Filtrar en el tiempo es convolucionar con h(t); en frecuencia es multiplicar por H(f). Y al revés: multiplicar en el tiempo es convolucionar en frecuencia. El muestreo es una multiplicación en el tiempo; el filtro de reconstrucción, una multiplicación en frecuencia.
-  </aside>
-</section>
-
-<!-- 7 · MUESTREO -->
-<section>
-  <h2><small>Capítulo 3 · Ejemplo 9</small>Muestrear repite el espectro</h2>
-  <div class="cols cols-ancha-izq">
-    <div>
-      <p><strong>Tiempo</strong>: multiplicar por el tren de impulsos.</p>
-      $$x_m(t)=x(t)\sum_{k=-\infty}^{\infty}\delta(t-k\Ts)$$
-      <p class="fragment"><strong>Frecuencia</strong>: convolucionar con otro tren.</p>
+      <p><strong>Tiempo:</strong> multiplicar por el tren de impulsos.</p>
+      $$x_m(t)=x(t)\sum_{k=-\infty}^{\infty}\delta(t-kT_s)$$
+      <p class="fragment"><strong>Frecuencia:</strong> convolucionar con otro tren, y cada impulso copia el espectro.</p>
       <div class="caja fragment">
-        $$X_m(f)=X(f)*\fs\sum_k\delta(f-k\fs)=\fs\sum_{k=-\infty}^{\infty}X(f-k\fs)$$
+        $$X_m(f)=f_s\sum_{k=-\infty}^{\infty}X(f-kf_s)$$
       </div>
-      <p class="fragment nota">En clase: \(\sum X(f-kf_s)\). El factor \(f_s\) viene de la tarea de la transformada del tren de impulsos.</p>
+      <p class="fragment nota">Ejemplo 9 del curso: producto en el tiempo, convolución en frecuencia.</p>
     </div>
-    <div class="graf fragment" data-g="espectro-replicas"></div>
+    <div class="graf" data-g="espectro-replicas"></div>
   </div>
-  <aside class="notes">
-    Es el Ejemplo 9: x(t) por el peine de deltas en el tiempo equivale, en frecuencia, a convolucionar X(f) con un peine en frecuencia. Por el repaso 3, eso copia el espectro en cada múltiplo de fs. En la gráfica el triángulo azul oscuro es el espectro original, con ancho de banda B, y las réplicas están en menos fs y más fs. Con fs = 3 y B = 1 no se tocan.
-  </aside>
 </section>
 
-<!-- 8 · LA PREGUNTA -->
+<!-- 3 · FILTRO IDEAL -->
 <section>
-  <h2><small>La pregunta</small>¿Cómo volvemos de las muestras a x(t)?</h2>
-  <div class="bloques">
-    <span class="nodo">\(x(t)\)</span><span class="flecha">→</span>
-    <span class="nodo">muestrear</span><span class="flecha">→</span>
-    <span class="nodo">\(x_m(t)\)</span><span class="flecha">→</span>
-    <span class="nodo interrogante">¿?</span><span class="flecha">→</span>
-    <span class="nodo naranja">\(x_r(t)\)</span>
-  </div>
-  <p class="enorme fragment">Nos quedamos con <em>una sola réplica</em> del espectro.</p>
-  <p class="fragment">Eso es un filtro, y en frecuencia filtrar es <strong>multiplicar</strong> por \(H(f)\).</p>
-  <aside class="notes">
-    Si el espectro quedó copiado muchas veces, para recuperar la señal basta con aislar la copia central. Aislar es filtrar, y por el repaso 4 es multiplicar por H(f). Falta decidir qué H(f) usar.
-  </aside>
-</section>
-
-<!-- 9 · PASO 1 -->
-<section>
-  <h2><small>Paso 1 · En frecuencia</small>Un rectángulo que deja pasar solo la réplica central</h2>
-  <div class="cols cols-ancha-izq">
+  <h2><small>Fundamentos · 2</small>Filtro ideal: quedarse con una réplica</h2>
+  <div class="cols">
     <div>
-      $$H(f)=\begin{cases}\Ts & |f|<\fs/2\\[2pt] 0 & \text{c.c.}\end{cases}$$
-      <div class="caja fragment">$$Y(f)=X_m(f)\,H(f)=X(f)$$</div>
-      <p class="fragment">Funciona si el corte cabe entre \(B\) y \(f_s-B\), o sea si \(B\lt f_s/2\).</p>
-      <p class="fragment nota">\(T_s\) compensa el factor \(f_s\): \(f_s\,T_s=1\).</p>
+      <p>Para recuperar \(x(t)\) multiplicamos por un rectángulo:</p>
+      $$H(f)=\begin{cases}T_s, & |f|\lt f_s/2\\[2pt] 0, & \text{en otro caso}\end{cases}$$
+      <div class="caja fragment">
+        $$Y(f)=X_m(f)\,H(f)=X(f)$$
+      </div>
+      <p class="fragment">Solo funciona si las réplicas no se tocan: \(B\lt f_s/2\), es decir \(f_s>2B\).</p>
     </div>
     <div class="graf" data-g="espectro-filtro"></div>
   </div>
-  <aside class="notes">
-    El filtro ideal es un rectángulo en frecuencia, con altura Ts para cancelar el factor fs que trae el peine. Al multiplicar, la réplica central queda intacta y las demás se anulan. Esto solo es posible si las réplicas no se tocan, es decir, si B es menor que fs sobre 2.
-  </aside>
 </section>
 
-<!-- 10 · PASO 2 -->
+<!-- 4 · DUALIDAD -->
 <section>
-  <h2><small>Paso 2 · Capítulo 2: dualidad</small>La respuesta al impulso del filtro es una sinc</h2>
-  <div class="cols cols-ancha-izq">
+  <h2><small>Fundamentos · 3</small>Dualidad: en el tiempo es una sinc</h2>
+  <div class="cols">
     <div>
-      <p>De clase: \(A\,T\,\sinc(tT)\TF A\,\rect_T(f)\).</p>
-      <p class="fragment">Con \(T=f_s\) y \(A=T_s\) se cumple \(A\,T=T_s f_s=1\):</p>
+      <p>De clase, por dualidad (\(S(t)\longleftrightarrow s(-f)\)):</p>
+      $$A\,T\,\mathrm{sinc}(tT)\;\overset{\mathcal F}{\longleftrightarrow}\;A\,\mathrm{rect}_T(f)$$
+      <p class="fragment">Con \(T=f_s\) y \(A=T_s\):</p>
       <div class="caja fragment">
-        $$h(t)=\sinc(\fs\,t)=\sinc\!\left(\frac{t}{\Ts}\right)\TF H(f)=\Ts\,\rect_{\fs}(f)$$
+        $$h(t)=\mathrm{sinc}\!\left(\frac{t}{T_s}\right)\;\overset{\mathcal F}{\longleftrightarrow}\;H(f)=T_s\,\mathrm{rect}_{f_s}(f)$$
       </div>
-      <p class="fragment nota">\(h(t)\) vale 1 en \(t=0\) y se anula en \(t=\pm T_s,\pm 2T_s,\dots\)</p>
+      <p class="fragment nota">\(h(t)\) vale 1 en \(t=0\) y se anula en \(t=\pm T_s,\pm2T_s,\dots\)</p>
     </div>
     <div class="graf fragment" data-g="sinc-ceros"></div>
   </div>
-  <aside class="notes">
-    Pasamos el filtro al tiempo usando la dualidad del repaso 2. Elegimos T igual a fs y A igual a Ts para que A por T sea 1. Entonces la respuesta al impulso del filtro es sinc de t sobre Ts. Fijarse en los puntos blancos: se anula justo en los instantes de muestreo vecinos.
-  </aside>
 </section>
 
-<!-- 11 · PASO 3 -->
+<!-- 5 · INTERPOLACION -->
 <section>
-  <h2><small>Paso 3 · En el tiempo</small>Interpolación sinc: una sinc por cada muestra</h2>
-  <div class="cols cols-ancha-izq">
-    <div>
-      $$x_r(t)=x_m(t)*h(t)=\Big[\sum_k x(k\Ts)\,\delta(t-k\Ts)\Big]*h(t)$$
-      <p class="fragment nota">Linealidad y \(x(t)*\delta(t-t_0)=x(t-t_0)\), como en los Ejemplos 6–8:</p>
-      <div class="caja fragment">
-        $$x_r(t)=\sum_{k=-\infty}^{\infty}x(k\Ts)\,\sinc\!\left(\frac{t-k\Ts}{\Ts}\right)$$
-      </div>
-      <p class="fragment">Cada muestra pone una sinc centrada en \(kT_s\), escalada por su valor.</p>
-    </div>
-    <div class="graf fragment" data-g="interp2"></div>
-  </div>
-  <aside class="notes">
-    x_m(t) son impulsos en cada muestra con la altura de la muestra. Convolucionar con h(t) cambia cada impulso por una copia de h(t) desplazada y escalada, igual que cuando convolucionamos con deltas en clase. La gráfica tiene solo dos muestras de ejemplo, con valores 1 y 0,6: en azul la sinc de la primera, en naranja la de la segunda y en amarillo la suma.
-  </aside>
-</section>
-
-<!-- 12 · POR QUÉ PASA POR LAS MUESTRAS -->
-<section>
-  <h2><small>Comprobación</small>¿Por qué la suma pasa justo por las muestras?</h2>
-  <p>Evaluamos en un instante de muestreo \(t=n\,T_s\):</p>
-  <div class="caja">
-    $$x_r(n\Ts)=\sum_k x(k\Ts)\,\sinc(n-k)$$
-  </div>
-  <table class="fragment">
-    <tr><th>\(n-k\)</th><td>0</td><td>\(\pm1\)</td><td>\(\pm2\)</td><td>\(\pm3\)</td><td>…</td></tr>
-    <tr><th>\(\sinc(n-k)\)</th><td><strong>1</strong></td><td>0</td><td>0</td><td>0</td><td>…</td></tr>
-  </table>
-  <p class="fragment">Es exactamente el impulso discreto de clase: \(\sinc(n-k)=\delta[n-k]\).</p>
-  <div class="caja caja-verde fragment">
-    $$x_r(n\Ts)=\sum_k x(k\Ts)\,\delta[n-k]=x(n\Ts)$$
-  </div>
-  <aside class="notes">
-    Conexión con el impulso unitario del capítulo 1: delta de n vale 1 solo en n igual a cero. Como sinc de un entero distinto de cero es cero, la suma de sincs vale exactamente la muestra en cada instante de muestreo. Entre muestras, las colas de todas las sincs se suman y reconstruyen la señal.
-  </aside>
-</section>
-
-<!-- 13 · PERFECTA -->
-<section>
-  <h2><small>Reconstrucción perfecta</small>¿Cuándo recuperamos \(x(t)\) exacta?</h2>
+  <h2><small>Fundamentos · 4</small>Interpolación sinc</h2>
   <div class="cols">
     <div>
-      <div class="caja caja-azul fragment"><strong>1.</strong> La señal es de <strong>banda limitada</strong>: \(X(f)=0\) para \(|f|>B\).</div>
-      <div class="caja caja-azul fragment"><strong>2.</strong> Se muestrea lo suficientemente rápido: \(f_s>2B\) <span class="nota">(en clase: \(f_s\ge 2B\))</span></div>
-      <div class="caja caja-azul fragment"><strong>3.</strong> Se usa el filtro ideal: \(H(f)=T_s\,\rect_{f_s}(f)\).</div>
+      <p><strong>1.</strong> Las muestras son impulsos:</p>
+      $$x_m(t)=\sum_{k}x(kT_s)\,\delta(t-kT_s)$$
+      <p class="fragment"><strong>2.</strong> Filtramos: \(x_r(t)=x_m(t)*h(t)\). Convolucionar con \(\delta(t-t_0)\) desplaza, así que:</p>
+      <div class="caja fragment">
+        $$x_r(t)=\sum_{k=-\infty}^{\infty}x(kT_s)\,\mathrm{sinc}\!\left(\frac{t-kT_s}{T_s}\right)$$
+      </div>
+      <p class="fragment">En \(t=nT_s\): \(\mathrm{sinc}(n-k)=\delta[n-k]\), luego \(x_r(nT_s)=x(nT_s)\): pasa por todas las muestras.</p>
+    </div>
+    <div>
+      <div class="graf fragment" data-g="interp2"></div>
+      <p class="nota fragment">Azul y naranja: una sinc por muestra. Amarillo: la suma.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · PERFECTA -->
+<section>
+  <h2><small>Fundamentos · 5</small>Reconstrucción perfecta</h2>
+  <div class="cols">
+    <div>
+      <div class="caja caja-azul fragment"><strong>1.</strong> Señal de banda limitada: \(X(f)=0\) para \(|f|>B\).</div>
+      <div class="caja caja-azul fragment"><strong>2.</strong> Muestreo suficiente: \(f_s>2B\) (Nyquist).</div>
+      <div class="caja caja-azul fragment"><strong>3.</strong> Filtro ideal: \(H(f)=T_s\,\mathrm{rect}_{f_s}(f)\).</div>
       <div class="caja caja-verde fragment">
-        <strong>Ejemplo de clase:</strong> \(x(t)=3\cos(2\pi t)\)<br>
-        \(B=1\) Hz y \(T_s=1/4\Rightarrow f_s=4\) Hz \(>2B=2\) Hz
+        <strong>Ejemplo de clase:</strong> \(x(t)=3\cos(2\pi t)\), \(B=1\) Hz, \(T_s=\tfrac14\) s\(\Rightarrow f_s=4\) Hz \(>2\) Hz
       </div>
     </div>
     <div class="graf fragment" data-g="ejemplo-perfecto"></div>
   </div>
-  <aside class="notes">
-    Tres condiciones: banda limitada, fs mayor que 2B y filtro ideal. En clase se escribe fs mayor o igual que 2B; con igualdad las réplicas solo se tocan, por eso aquí pedimos mayor estricto. El ejemplo es el del cuaderno: 3cos(2πt) tiene frecuencia 1, Ts 1/4 da fs = 4. En la gráfica la curva azul es la señal original, los puntos amarillos las muestras y la línea naranja punteada la reconstrucción con sincs: se superponen.
-  </aside>
 </section>
 
-<!-- 14 · ALIASING (TIEMPO) -->
+<!-- 7 · ALIASING -->
 <section>
-  <h2><small>Error 1 · Capítulo 1</small>Aliasing: dos señales, las mismas muestras</h2>
-  <div class="cols">
-    <div>
-      <p>Si \(x_2[n]=e^{j(2\pi(f+1)n+\phi)}\), entonces:</p>
-      <div class="caja">$$x_2[n]=x_1[n]\,e^{j2\pi n}=x_1[n]$$</div>
-      <div class="fragment">
-        <p><strong>Ejercicio de clase:</strong> \(\cos\!\big(\tfrac{\pi}{6}n\big)\) y \(\cos\!\big(\tfrac{13\pi}{6}n\big)\) son la misma señal discreta, porque \(\tfrac{13\pi}{6}=\tfrac{\pi}{6}+2\pi\).</p>
-      </div>
-      <p class="fragment">Con \(f_s=4\) Hz, \(\cos(2\pi t)\) y \(\cos(2\pi\cdot 3t)\) pasan por los mismos puntos. El reconstructor solo deja pasar \(|f|\lt f_s/2=2\) Hz y entrega la de 1 Hz.</p>
-    </div>
-    <div class="graf fragment" data-g="alias-t"></div>
-  </div>
-  <aside class="notes">
-    Aliasing visto en el capítulo 1: sumar 2π n a la fase no cambia nada porque e a la j 2π n vale 1. En el ejercicio de clase, π sobre 6 y 13π sobre 6 dan la misma señal discreta. En continuo, con fs igual a 4, las frecuencias 1 y 3 Hz tienen las mismas muestras. Como el filtro solo deja pasar hasta fs sobre 2, que es 2 Hz, la reconstrucción devuelve la de 1 Hz aunque la señal original fuera la de 3 Hz.
-  </aside>
-</section>
-
-<!-- 15 · ALIASING (FRECUENCIA + REC.) -->
-<section>
-  <h2><small>Error 1 · aliasing en la reconstrucción</small>Si \(f_s<2B\), las réplicas se solapan</h2>
+  <h2><small>Errores de reconstrucción · 1</small>Aliasing: \(f_s\lt2B\)</h2>
   <div class="cols">
     <div>
       <div class="graf" data-g="espectro-solape"></div>
-      <p class="nota">Las partes solapadas se suman y no se pueden separar.</p>
+      <p class="nota">Las réplicas se solapan: se suman y no se pueden separar.</p>
     </div>
     <div>
-      <p class="fragment">Ejemplo de clase: \(x(t)=3\cos(2\pi t)\) con \(T_s=1/\sqrt2\), es decir \(f_s\approx1{,}41\) Hz \(<2B=2\) Hz.</p>
-      <div class="graf fragment" data-g="ejemplo-alias"></div>
-      <p class="fragment">La reconstrucción es una cosenoidal más lenta (\(\approx0{,}41\) Hz): <strong>otra señal</strong>.</p>
+      <div class="graf fragment" data-g="alias-t"></div>
+      <p class="nota fragment">Con \(f_s=4\) Hz, \(\cos(2\pi t)\) y \(\cos(2\pi\cdot3t)\) dan las mismas muestras; igual que \(\cos(\tfrac{\pi}{6}n)\) y \(\cos(\tfrac{13\pi}{6}n)\) en clase.</p>
     </div>
   </div>
-  <aside class="notes">
-    Mismo fenómeno visto en frecuencia: cuando fs es menor que 2B las réplicas se montan unas sobre otras y la suma amarilla ya no permite recuperar el espectro original. Con el ejemplo 3cos(2πt) y Ts igual a 1/raíz de 2, fs vale aproximadamente 1,41. La señal reconstruida, en naranja, es una cosenoidal de unos 0,41 Hz, que es el valor absoluto de 1 menos 1,41. Ese error ya no se puede corregir después.
-  </aside>
+  <div class="caja caja-roja fragment">El filtro entrega la frecuencia menor: se reconstruye <strong>otra señal</strong> y el error no se puede corregir.</div>
 </section>
 
-<!-- 16 · ERROR 2 -->
+<!-- 8 · TRUNCAR Y NO IDEAL -->
 <section>
-  <h2><small>Error 2 · Capítulo 3</small>El filtro ideal no se puede construir</h2>
+  <h2><small>Errores de reconstrucción · 2</small>Filtro no ideal y suma truncada</h2>
   <div class="tarjetas">
     <div class="tarjeta roja fragment">
       <h3>No es causal</h3>
-      <p>\(h(t)=\sinc(t/T_s)\) existe también para \(t<0\): la salida dependería de momentos futuros.</p>
-      <p class="nota">En clase, \(y(t)=x(t+2)\) es no causal.</p>
+      <p>\(h(t)\) existe para \(t\lt0\): la salida dependería del futuro.</p>
     </div>
     <div class="tarjeta naranja fragment">
       <h3>Infinitas muestras</h3>
-      <p>La sinc decae lento. Si cortamos la suma en un número finito de muestras, queda error, sobre todo en los bordes.</p>
+      <p>La sinc decae lento. Con pocas muestras queda error, sobre todo en los bordes.</p>
     </div>
     <div class="tarjeta fragment">
       <h3>Banda no limitada</h3>
-      <p>Una señal real tiene espectro por encima de \(f_s/2\): ese aliasing no se deshace. Hay que filtrar antes de muestrear.</p>
+      <p>El espectro real pasa de \(f_s/2\): hay que filtrar antes de muestrear.</p>
     </div>
   </div>
-  <aside class="notes">
-    Tres razones por las que en la práctica nunca llegamos a la reconstrucción perfecta. Primero, causalidad: la clasificación de sistemas del capítulo 3 dice que un sistema causal solo depende de presente y pasado, y la sinc se extiende a tiempos negativos. Segundo, la suma necesita todas las muestras; al truncarla aparece error. Tercero, las señales reales no son estrictamente de banda limitada.
-  </aside>
+  <p class="fragment" style="margin-top:1em">Medimos el error con la energía de clase:</p>
+  <div class="caja fragment">
+    $$e(t)=x(t)-x_r(t),\qquad E_e=\int_{-\infty}^{\infty}e^2(t)\,dt$$
+  </div>
 </section>
 
-<!-- 17 · MEDIR EL ERROR -->
+<!-- 9 · EJEMPLO 1 -->
 <section>
-  <h2><small>Capítulo 1 · Energía</small>Medimos el error con la energía</h2>
+  <h2><small>Ejemplo desarrollado · 1 de 2</small>Reconstruir \(x_r(1/8)\)</h2>
+  <p>\(x(t)=3\cos(2\pi t)\), \(T_s=\tfrac14\): \(f_s=4>2B=2\), sí cumple. Muestras \(x[k]=3\cos(\tfrac{\pi k}{2})\): \(\;3,0,-3,0,3,\dots\)</p>
   <div class="cols">
     <div>
-      <p>Energía de clase: \(E_s=\displaystyle\int_{-\infty}^{\infty}s^2(t)\,dt\), y en discreto \(E=\displaystyle\sum_n s^2[n]\).</p>
-      <p class="fragment">Aplicada a la diferencia entre la señal y su reconstrucción:</p>
-      <div class="caja fragment">
-        $$e(t)=x(t)-x_r(t)\qquad E_e=\int_{-\infty}^{\infty}e^2(t)\,dt$$
-      </div>
-      <p class="fragment">\(E_e=0\) significa reconstrucción perfecta; cuanto mayor es \(E_e\), peor.</p>
-    </div>
-    <div>
-      <table class="fragment">
-        <tr><th>Causa</th><th>Cómo se reduce</th></tr>
-        <tr><td>Aliasing</td><td>\(f_s>2B\) y filtrar antes de muestrear</td></tr>
-        <tr><td>Suma truncada</td><td>Usar más muestras</td></tr>
-        <tr><td>Filtro no ideal</td><td>Mejor corte del filtro o mayor \(f_s\)</td></tr>
-      </table>
-    </div>
-  </div>
-  <aside class="notes">
-    Para poner un número al error usamos la definición de energía del capítulo 1, aplicada a e(t), la diferencia entre la señal original y la reconstruida. La tabla resume las fuentes de error vistas y cómo se atacan. En la siguiente diapositiva se puede ver el valor de esta energía en vivo.
-  </aside>
-</section>
-
-<!-- EJEMPLO 1 -->
-<section>
-  <h2><small>Ejemplo desarrollado · 1 de 3</small>Datos y muestras</h2>
-  <p><strong>Problema.</strong> \(x(t)=3\cos(2\pi t)\) se muestrea con \(T_s=1/4\) s. ¿Se puede reconstruir? Calcular \(x_r(1/8)\).</p>
-  <div class="caja fragment"><strong>1. Nyquist:</strong> \(B=1\) Hz y \(f_s=1/T_s=4\) Hz \(>2B=2\) Hz: sí se cumple.</div>
-  <div class="caja fragment"><strong>2. Muestras:</strong> \(x[k]=x(k/4)=3\cos\!\big(\tfrac{\pi k}{2}\big)\)
-    <table>
-      <tr><th>\(k\)</th><th>−4</th><th>−3</th><th>−2</th><th>−1</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
-      <tr><td>\(x[k]\)</td><td>3</td><td>0</td><td>−3</td><td>0</td><td>3</td><td>0</td><td>−3</td><td>0</td><td>3</td></tr>
-    </table>
-  </div>
-  <div class="caja fragment"><strong>3. Planteo:</strong> \(x_r(t)=\displaystyle\sum_k x[k]\,\sinc\!\left(\frac{t-k/4}{1/4}\right)=\sum_k x[k]\,\sinc(4t-k)\)</div>
-  <aside class="notes">Paso 1: comprobar Nyquist. Paso 2: tabla de muestras; las impares valen cero porque el coseno vale cero en pi/2, 3pi/2... Paso 3: escribir la suma de sincs de la diapositiva 12 con Ts = 1/4.</aside>
-</section>
-
-<!-- EJEMPLO 2 -->
-<section>
-  <h2><small>Ejemplo desarrollado · 2 de 3</small>Reconstruir \(x_r(1/8)\) con la suma de sincs</h2>
-  <div class="cols">
-    <div>
-      <p>En \(t=1/8\): \(4t=\tfrac12\), luego \(x_r(\tfrac18)=\sum_k x[k]\,\sinc(\tfrac12-k)\).</p>
+      $$x_r(\tfrac18)=\sum_k x[k]\,\mathrm{sinc}(\tfrac12-k)$$
       <table>
-        <tr><th>\(k\)</th><th>\(x[k]\)</th><th>\(\sinc(\tfrac12-k)\)</th><th>término</th></tr>
+        <tr><th>\(k\)</th><th>\(x[k]\)</th><th>\(\mathrm{sinc}(\tfrac12-k)\)</th><th>término</th></tr>
         <tr><td>0</td><td>3</td><td>0,6366</td><td>1,9099</td></tr>
         <tr><td>2</td><td>−3</td><td>−0,2122</td><td>0,6366</td></tr>
         <tr><td>−2</td><td>−3</td><td>0,1273</td><td>−0,3820</td></tr>
         <tr><td>4</td><td>3</td><td>−0,0909</td><td>−0,2728</td></tr>
         <tr><td>−4</td><td>3</td><td>0,0707</td><td>0,2122</td></tr>
-        <tr><td>impares</td><td>0</td><td>·</td><td>0</td></tr>
       </table>
-      <p class="nota">Para \(k\) par: \(\sinc(\tfrac12-k)=\dfrac{1}{\pi(\frac12-k)}\), porque \(\sin(\tfrac{\pi}{2}-\pi k)=\cos(\pi k)=(-1)^k\).</p>
+      <p class="nota">Con \(k\) impar, \(x[k]=0\).</p>
+    </div>
+    <div class="fragment">
+      <p><strong>Suma con \(|k|\le M\):</strong></p>
+      <table>
+        <tr><th>\(M\)</th><th>0</th><th>2</th><th>4</th><th>10</th><th>100</th></tr>
+        <tr><td>\(x_r(\tfrac18)\)</td><td>1,910</td><td>2,165</td><td>2,104</td><td>2,125</td><td>2,121</td></tr>
+      </table>
+      <div class="caja caja-verde">Exacto: \(3\cos(\tfrac{\pi}{4})=2{,}1213\). La suma converge a él.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 · EJEMPLO 2 -->
+<section>
+  <h2><small>Ejemplo desarrollado · 2 de 2</small>El mismo \(x(t)\) con \(T_s=1/\sqrt2\)</h2>
+  <div class="cols" style="grid-template-columns:1fr">
+    <div>
+      <p>\(f_s=\sqrt2\approx1{,}41\lt2B=2\): <strong>no cumple</strong>. Como en el aliasing de clase:</p>
+      $$\cos(2\pi\cdot0{,}7071\,n)=\cos\big(2\pi(0{,}7071-1)\,n\big)=\cos(2\pi\cdot0{,}2929\,n)$$
+      <div class="caja caja-verde fragment">
+        $$f_a=0{,}2929\,f_s=0{,}4142\ \text{Hz}\;\Rightarrow\;x_r(t)=3\cos(2\pi\cdot0{,}4142\,t)\neq x(t)$$
+      </div>
     </div>
     <div>
-      <p class="fragment"><strong>Sumas parciales</strong> (todos los \(k\) con \(|k|\le M\)):</p>
-      <table class="fragment">
-        <tr><th>\(M\)</th><th>\(x_r(1/8)\)</th></tr>
-        <tr><td>0</td><td>1,9099</td></tr>
-        <tr><td>2</td><td>2,1645</td></tr>
-        <tr><td>4</td><td>2,1039</td></tr>
-        <tr><td>10</td><td>2,1252</td></tr>
-        <tr><td>100</td><td>2,1213</td></tr>
-      </table>
-      <div class="caja caja-verde fragment">Valor exacto: \(x(1/8)=3\cos(\pi/4)=2{,}1213\). La suma converge a él.</div>
+      <div class="graf fragment" data-g="ejemplo-alias" style="width:44%;margin:0 auto"></div>
+      <p class="nota fragment">Azul: \(x(t)\). Naranja: la reconstrucción con sincs.</p>
     </div>
   </div>
-  <aside class="notes">Se calcula x_r en un instante entre muestras (t = 1/8, justo a la mitad de dos muestras). Solo contribuyen las muestras pares. Cada término es una sinc evaluada en un punto medio. Las sumas parciales oscilan alrededor del valor exacto y se acercan: con |k| menor o igual a 100 coincide con 3cos(pi/4) = 2,1213 en cuatro decimales. Los valores se calcularon con Python.</aside>
 </section>
 
-<!-- EJEMPLO 3 -->
+<!-- 11 · SIMULACION -->
 <section>
-  <h2><small>Ejemplo desarrollado · 3 de 3</small>El mismo cálculo con \(T_s=1/\sqrt2\): aliasing</h2>
-  <div class="caja"><strong>1. Nyquist:</strong> \(f_s=\sqrt2\approx1{,}41\) Hz \(\lt 2B=2\) Hz: <strong>no</strong> se cumple.</div>
-  <div class="caja fragment"><strong>2. Muestras:</strong> \(x[n]=3\cos\!\big(2\pi\,\tfrac{f_0}{f_s}\,n\big)=3\cos(2\pi\cdot0{,}7071\,n)\)</div>
-  <div class="caja fragment"><strong>3. Como en el aliasing de clase</strong> (sumar \(2\pi n\) a la fase no cambia la señal discreta):
-    $$\cos(2\pi\cdot0{,}7071\,n)=\cos\big(2\pi\,(0{,}7071-1)\,n\big)=\cos(2\pi\cdot0{,}2929\,n)$$
-  </div>
-  <div class="caja caja-verde fragment"><strong>4. Frecuencia que reconstruye el filtro:</strong>
-    \(f_a=0{,}2929\,f_s=0{,}4142\) Hz, o sea \(x_r(t)=3\cos(2\pi\cdot0{,}4142\,t)\neq x(t)\).
-  </div>
-  <p class="fragment nota">Se comprueba con Python en la simulación (caso 2): frecuencia medida 0,4140 Hz y amplitud 3,000.</p>
-  <aside class="notes">Mismo razonamiento del ejercicio de clase con cos(pi/6 n) y cos(13 pi/6 n): sumar 2 pi n a la fase no cambia nada. Aquí f0/fs = 0,7071 se lleva a 0,7071 - 1 = -0,2929, y como el coseno es par queda 0,2929 ciclos por muestra. Multiplicando por fs resulta 0,4142 Hz. El filtro ideal deja pasar hasta fs/2 = 0,707 Hz, así que entrega esa cosenoidal lenta. Es la misma frecuencia que |1 - 1,41| de la diapositiva de aliasing.</aside>
-</section>
-
-<!-- SIMULACION 1 · CODIGO -->
-<section>
-  <h2><small>Simulación en Python · 1 de 4</small>Código</h2>
+  <h2><small>Simulación en Python</small>Reconstrucción con sincs y error</h2>
   <div class="cols cols-ancha-izq">
     <div>
 <pre><code class="language-python">import numpy as np
 
-def x(t):                         # x(t) = 3 cos(2 pi t)
+def x(t):                          # x(t) = 3 cos(2 pi t)
     return 3 * np.cos(2 * np.pi * t)
 
-def reconstruir(t, tk, xk, Ts):   # x_r(t) = sum x[k] sinc((t-k Ts)/Ts)
+def reconstruir(t, tk, xk, Ts):    # sum x[k] sinc((t - k Ts)/Ts)
     return np.sinc((t[:, None] - tk[None, :]) / Ts) @ xk
 
-Ts, T = 1/4, 6                    # caso 1: fs = 4 Hz, muestras de -6 a 6 s
-K  = int(T / Ts)
-k  = np.arange(-K, K + 1)
-tk, xk = k * Ts, x(k * Ts)        # muestras
+Ts, T = 1/4, 6                     # caso 1: fs = 4 Hz
+k  = np.arange(-int(T/Ts), int(T/Ts) + 1)
+tk, xk = k * Ts, x(k * Ts)         # muestras
 t  = np.linspace(-2, 2, 4001)
-xr = reconstruir(t, tk, xk, Ts)   # reconstrucción con sincs
-e  = x(t) - xr                    # error
-Ee = energia(e, t)                # integral de e^2 (trapecio)</code></pre>
+xr = reconstruir(t, tk, xk, Ts)    # reconstrucción
+Ee = energia(x(t) - xr, t)         # E_e = integral de e^2</code></pre>
     </div>
     <div>
-      <p><strong>Correspondencia con la teoría</strong></p>
-      <ul>
-        <li class="fragment"><code>np.sinc</code> es la sinc de clase: \(\sin(\pi x)/(\pi x)\).</li>
-        <li class="fragment">La multiplicación matricial es la suma \(\sum_k x[k]\,\sinc(\cdot)\).</li>
-        <li class="fragment"><code>Ee</code> es \(E_e=\int e^2(t)\,dt\) de la energía de clase.</li>
+      <table>
+        <tr><th>Caso</th><th>\(T_s\)</th><th>\(f_s\)</th><th>\(f_s>2B\)</th></tr>
+        <tr><td>1</td><td>1/4</td><td>4</td><td>sí</td></tr>
+        <tr><td>2</td><td>1/√2</td><td>1,41</td><td>no</td></tr>
+        <tr><td>3</td><td>1/4, 5 muestras</td><td>4</td><td>sí</td></tr>
+      </table>
+      <p class="nota"><code>np.sinc</code> es la sinc de clase. Script completo: <code>simulacion/reconstruccion_sinc.py</code>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 12 · RESULTADOS -->
+<section>
+  <h2><small>Resultados e interpretación</small>Qué dicen los números</h2>
+  <img class="resumen-img" src="simulacion/figuras/resumen.png" alt="Reconstrucción en los casos 1, 2 y 3: x(t), x_r(t), muestras y energía del error">
+  <div class="cols" style="margin-top:.5em">
+    <div>
+      <table>
+        <tr><th>Caso</th><th>Muestras</th><th>\(E_e\)</th><th>% de \(E_x\)</th></tr>
+        <tr><td>1 · \(f_s=4\)</td><td>49</td><td>1,12×10⁻⁴</td><td>0,0006</td></tr>
+        <tr><td>2 · \(f_s=1{,}41\)</td><td>113</td><td>32,0</td><td>178</td></tr>
+        <tr><td>3 · \(f_s=4\), pocas</td><td>5</td><td>11,05</td><td>61,4</td></tr>
+        <tr><td>1 con ±48 s</td><td>385</td><td>2,80×10⁻⁸</td><td>≈ 0</td></tr>
+      </table>
+    </div>
+    <div>
+      <ul class="lectura">
+        <li>Con \(f_s>2B\) el error es casi cero.</li>
+        <li>Con \(f_s\lt2B\) más muestras no lo arreglan: sale otra señal (0,414 Hz).</li>
+        <li>Truncar sí se corrige: al duplicar el intervalo, \(E_e\) baja unas 16 veces.</li>
       </ul>
-      <p class="nota">Archivo completo: <code>simulacion/reconstruccion_sinc.py</code>. Funciona también pegado en Google Colab.</p>
     </div>
   </div>
-  <aside class="notes">Núcleo de la simulación. Lo importante es la función reconstruir, que implementa la fórmula de la diapositiva 12 con una matriz de sincs. El archivo completo también genera las figuras y las tablas que se muestran después. Se puede ejecutar con python reconstruccion_sinc.py o pegar en Colab.</aside>
-</section>
-
-<!-- SIMULACION 2 · CASOS 1 Y 2 -->
-<section>
-  <h2><small>Simulación en Python · 2 de 4</small>Resultados: Nyquist y aliasing</h2>
-  <div class="cols">
-    <div>
-      <img class="img-sim" src="simulacion/figuras/caso1.png" alt="Caso 1: reconstrucción con fs = 4 Hz; la curva reconstruida coincide con la original">
-      <p class="pie"><strong>Caso 1</strong> · \(f_s=4\) Hz, 49 muestras: \(E_e=1{,}12\times10^{-4}\) (0,0006 % de \(E_x=18\)).</p>
-    </div>
-    <div>
-      <img class="img-sim" src="simulacion/figuras/caso2.png" alt="Caso 2: con fs = 1,41 Hz la reconstrucción oscila a 0,414 Hz, distinta de la original">
-      <p class="pie"><strong>Caso 2</strong> · \(f_s=1{,}41\) Hz, 113 muestras: \(E_e=32{,}0\) (178 % de \(E_x\)). Frecuencia medida 0,4140 Hz (esperada 0,4142 Hz).</p>
-    </div>
-  </div>
-  <aside class="notes">Caso 1: la curva naranja punteada se superpone a la azul y el error es del orden de 1e-4. Caso 2: la curva naranja es otra cosenoidal, de 0,414 Hz y la misma amplitud 3, que coincide con la línea punteada blanca del alias esperado (ejemplo 3 de 3). En este caso se usaron muestras de -40 a 40 s (113 muestras) para que la reconstrucción en [-2, 2] no tenga efectos de borde.</aside>
-</section>
-
-<!-- SIMULACION 3 · CASO 3 Y ERROR -->
-<section>
-  <h2><small>Simulación en Python · 3 de 4</small>Resultados: error por truncar la suma</h2>
-  <div class="cols">
-    <div>
-      <img class="img-sim" src="simulacion/figuras/caso3.png" alt="Caso 3: con solo 5 muestras la reconstrucción se aleja de la original">
-      <p class="pie"><strong>Caso 3</strong> · \(f_s=4\) Hz pero solo 5 muestras (±0,5 s): \(E_e=11{,}05\) (61,4 %).</p>
-    </div>
-    <div>
-      <img class="img-sim" src="simulacion/figuras/error_vs_muestras.png" alt="Energía del error en escala logarítmica contra el número de muestras, para fs = 4 y fs = 2,5 Hz">
-      <p class="pie"><strong>Energía del error</strong> contra número de muestras (escala log-log).</p>
-    </div>
-  </div>
-  <aside class="notes">Caso 3: la frecuencia de muestreo cumple Nyquist pero solo hay 5 muestras, y la suma de sincs necesita muchas más porque la sinc decae lento. A la derecha, cómo baja el error al usar más muestras para fs = 4 Hz y fs = 2,5 Hz.</aside>
-</section>
-
-<!-- SIMULACION 4 · TABLAS -->
-<section>
-  <h2><small>Simulación en Python · 4 de 4</small>Tablas de resultados</h2>
-  <div class="cols">
-    <div>
-      <p><strong>A · Más muestras</strong> (\(f_s=4\) Hz)</p>
-      <table>
-        <tr><th>Muestras de −T a T</th><th>Nº</th><th>\(E_e\)</th></tr>
-        <tr><td>±0,5 s</td><td>5</td><td>11,05</td></tr>
-        <tr><td>±2 s</td><td>17</td><td>0,0223</td></tr>
-        <tr><td>±6 s</td><td>49</td><td>1,12×10⁻⁴</td></tr>
-        <tr><td>±12 s</td><td>97</td><td>6,94×10⁻⁶</td></tr>
-        <tr><td>±24 s</td><td>193</td><td>4,42×10⁻⁷</td></tr>
-        <tr><td>±48 s</td><td>385</td><td>2,80×10⁻⁸</td></tr>
-      </table>
-    </div>
-    <div>
-      <p><strong>B · Distinta \(f_s\)</strong> (muestras de −6 a 6 s)</p>
-      <table>
-        <tr><th>\(f_s\) (Hz)</th><th>\(f_s>2B\)</th><th>\(E_e\)</th><th>% de \(E_x\)</th></tr>
-        <tr><td>1,414</td><td>no</td><td>32,3</td><td>179,4</td></tr>
-        <tr><td>2,5</td><td>sí</td><td>3,96×10⁻⁵</td><td>&lt; 0,001</td></tr>
-        <tr><td>3</td><td>sí</td><td>1,41×10⁻⁴</td><td>&lt; 0,001</td></tr>
-        <tr><td>4</td><td>sí</td><td>1,12×10⁻⁴</td><td>&lt; 0,001</td></tr>
-        <tr><td>6</td><td>sí</td><td>5,53×10⁻⁵</td><td>&lt; 0,001</td></tr>
-        <tr><td>8</td><td>sí</td><td>3,20×10⁻⁵</td><td>&lt; 0,001</td></tr>
-      </table>
-    </div>
-  </div>
-  <p class="nota">\(E_x=18\) es la energía de \(x(t)\) en la ventana \([-2,2]\) s. Valores obtenidos con <code>reconstruccion_sinc.py</code> (también en <code>simulacion/resultados.txt</code>).</p>
-  <aside class="notes">Tabla A: al aumentar el intervalo de muestras el error cae muchísimo. Tabla B: con fs menor que 2B el error es del orden de la energía de la propia señal (179 %), y con fs mayor que 2B es despreciable. Las diferencias entre filas de la tabla B cuando fs es mayor que 2B son efectos de borde de truncar la suma, no del criterio de Nyquist.</aside>
-</section>
-
-<!-- INTERPRETACION -->
-<section>
-  <h2><small>Interpretación de resultados</small>Qué nos dicen los números</h2>
-  <ol>
-    <li class="fragment"><strong>Con \(f_s>2B\) la reconstrucción es prácticamente exacta:</strong> en el caso 1, \(E_e\) es el 0,0006 % de \(E_x\). Lo que queda es error de truncar la suma, no de Nyquist.</li>
-    <li class="fragment"><strong>Con \(f_s\lt 2B\) el error no se arregla con más muestras:</strong> pasar de 17 a 113 muestras deja el error en 179 % y 178 % de \(E_x\). La reconstrucción es otra señal, de 0,414 Hz, como predijo el ejemplo 3 de 3.</li>
-    <li class="fragment"><strong>Truncar sí se corrige con más muestras:</strong> con \(f_s=4\) Hz, 5 muestras dan 61 % de error, y desde ±12 s cada vez que se duplica el intervalo la energía del error baja unas 16 veces.</li>
-    <li class="fragment"><strong>Subir \(f_s\) por encima de \(2B\) no mejora de forma ordenada</strong> con el mismo intervalo: manda el efecto de borde del truncado (todos quedan por debajo de 0,001 %).</li>
-  </ol>
-  <div class="caja caja-azul fragment">Nyquist (\(f_s>2B\)) es la condición necesaria; tener suficientes muestras y un buen filtro reduce el error restante.</div>
-  <aside class="notes">Cuatro lecturas de las tablas. Punto 3: de 6,94e-6 a 4,42e-7 a 2,80e-8 al duplicar T, o sea un factor cercano a 16 cada vez; no es una ley general sino lo que se observa para este coseno con fs = 4. Punto 4: la tabla B no es monótona (por ejemplo fs = 3 da más error que fs = 4 y fs = 2,5 menos que fs = 3) porque con intervalo fijo el error depende de cómo caen las colas de las sincs en los bordes, todo muy por debajo del 0,001 %.</aside>
-</section>
-
-<!-- 18 · DEMOSTRACIÓN -->
-<section>
-  <h2><small>Demostración interactiva</small>Reconstruir \(x(t)=3\cos(2\pi f_0 t)\) con sincs</h2>
-  <div class="demo-grid">
-    <canvas id="demo-canvas" width="1000" height="560"></canvas>
-    <div data-prevent-swipe>
-      <div class="ctrl"><label>Frecuencia de muestreo \(f_s\) <output id="out-fs"></output></label>
-        <input id="ctl-fs" type="range" min="0.5" max="10" step="0.01" value="4"></div>
-      <div class="ctrl"><label>Muestras usadas (de \(-T\) a \(T\)) <output id="out-T"></output></label>
-        <input id="ctl-T" type="range" min="0.25" max="8" step="0.25" value="6"></div>
-      <div class="ctrl"><label>Frecuencia de la señal \(f_0=B\) <output id="out-f0"></output></label>
-        <input id="ctl-f0" type="range" min="0.25" max="4" step="0.05" value="1"></div>
-      <div class="casos">
-        <button id="caso1">Caso 1 · fs = 4 Hz (cumple Nyquist)</button>
-        <button id="caso2">Caso 2 · fs ≈ 1,41 Hz (aliasing)</button>
-        <button id="caso3">Caso 3 · pocas muestras (±0,5 s)</button>
-      </div>
-      <div id="demo-info"></div>
-    </div>
-  </div>
-  <aside class="notes">
-    Demostración en vivo con la señal del cuaderno. Caso 1: fs = 4, se cumple Nyquist y el error es casi cero (queda un residuo por usar un número finito de muestras). Caso 2: fs = 1,41, aparece aliasing y se reconstruye otra frecuencia. Caso 3: fs = 4 pero con muestras solo entre menos 0,5 y 0,5 s: el error crece y se concentra fuera de ese intervalo. Los deslizadores permiten probar cualquier combinación. La energía mostrada se calcula numéricamente en la ventana de -2 a 2 segundos.
-  </aside>
-</section>
-
-<!-- 19 · CONCLUSIONES -->
-<section>
-  <h2><small>Conclusiones</small>Lo que nos llevamos</h2>
-  <ol>
-    <li class="fragment">Reconstruir es <strong>quedarse con una réplica</strong> del espectro: multiplicar por un rectángulo \(H(f)\).</li>
-    <li class="fragment">Por dualidad, en el tiempo eso es <strong>sumar sincs</strong>, una por muestra, y la suma pasa por todos los puntos.</li>
-    <li class="fragment">Es <strong>perfecta</strong> si la señal es de banda limitada y \(f_s>2B\); si no, hay <strong>aliasing</strong>.</li>
-    <li class="fragment">La simulación en Python lo confirma: con \(f_s=4\) Hz el error es 0,0006 % de \(E_x\); con \(f_s\approx1{,}41\) Hz se reconstruye otra frecuencia (0,414 Hz).</li>
-    <li class="fragment">En la práctica el filtro no es ideal y las muestras son finitas: queda un <strong>error</strong> que medimos con su energía.</li>
-  </ol>
-  <p class="enorme fragment" style="margin-top:.8em">Gracias · <em>¿Preguntas?</em></p>
-  <aside class="notes">
-    Cierre: todo salió de herramientas del curso. Dejar espacio para preguntas y, si hay tiempo, volver a la demostración o a la diapositiva de aliasing.
-  </aside>
 </section>
 
 </div>
 </div>
 
-<script src="lib/katex/dist/katex.min.js"></script>
-<script src="lib/katex/dist/contrib/auto-render.min.js"></script>
 <script src="lib/reveal/reveal.js"></script>
-<script src="lib/reveal/plugin/notes/notes.js"></script>
+<script src="lib/reveal/plugin/math/math.js"></script>
 <script src="js/graficas.js"></script>
 <script src="js/main.js"></script>
 </body>

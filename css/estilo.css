@@ -173,3 +173,15 @@ body, .reveal-viewport { background: var(--bg); }
 .reveal pre code { color: #d6deeb; }
 .img-sim { width: 100%; border-radius: 8px; border: 1px solid var(--linea); display: block; margin: 0; }
 .pie { font-size: .62em; line-height: 1.35; margin: .35em 0 0; }
+
+/* ---- versión compacta: 12 diapositivas, textos y ecuaciones más grandes ---- */
+.reveal .slides section { font-size: 29px; }
+.reveal .katex-display { margin: .35em 0; }
+.reveal .katex-display > .katex { font-size: 1.22em; }
+.reveal .slides section.portada { text-align: center; padding-top: 95px; }
+.portada h1 { font-size: 2.15em; margin: 0 0 .25em; }
+.portada .sub { font-size: 1.05em; color: var(--texto); margin: 0 auto; max-width: 1000px; }
+.portada .curso { color: var(--naranja); letter-spacing: .12em; text-transform: uppercase; font-size: .7em; margin: 1.3em 0 .2em; }
+.portada .etq { color: var(--azul); font-size: .8em; margin: 1.1em 0 .2em; }
+.portada .integrantes { font-size: .8em; line-height: 1.55; color: var(--texto); margin: 0; }
+.resumen-img { width: 100%; border-radius: 8px; border: 1px solid var(--linea); display: block; }

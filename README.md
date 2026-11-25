@@ -41,6 +41,6 @@ lib/katex/dist/   # KaTeX 0.16 (copia local, para las fórmulas)
 6. Ejemplo numérico: x_r(1/8)
 7. Reconstrucción perfecta: condiciones de Nyquist-Shannon
 8-10. Errores: aliasing, truncamiento e interpolación lineal
-11-12. Ejercicio tipo examen y su solución
+11-12. Ejercicio y su solución
 
 `simulacion/` contiene el script de Python usado para comprobar los valores (material extra, no se presenta).

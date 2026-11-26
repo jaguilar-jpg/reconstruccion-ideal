@@ -92,27 +92,77 @@
   </div>
 </section>
 
-<!-- 6 · EJEMPLO NUMERICO -->
+<!-- 6 · EJEMPLO 1/3 -->
 <section>
-  <h2><small>Ejemplo numérico</small>Calcular \(x_r(1/8)\)</h2>
-  <p>\(x(t)=3\cos(2\pi t)\), \(T_s=\tfrac14\). Muestras \(x[k]=3\cos(\tfrac{\pi k}{2})\): \(\;3,0,-3,0,3,\dots\)</p>
+  <h2><small>Ejemplo numérico · 1 de 3</small>Datos y muestras</h2>
+  <p>Señal \(x(t)=3\cos(2\pi t)\), con \(T_s=\tfrac14\) s. Queremos \(x_r\) en \(t=\tfrac18\) s.</p>
   <div class="cols">
     <div>
-      $$x_r(\tfrac18)=\sum_k x[k]\,\mathrm{sinc}(\tfrac12-k)$$
+      <p><strong>Muestras:</strong> evaluamos \(x(t)\) en \(t=kT_s=\tfrac{k}{4}\).</p>
+      $$x[k]=3\cos\!\left(2\pi\cdot\tfrac{k}{4}\right)=3\cos\!\left(\tfrac{\pi k}{2}\right)$$
       <table>
-        <tr><th>\(k\)</th><th>\(x[k]\)</th><th>\(\mathrm{sinc}(\tfrac12-k)\)</th><th>término</th></tr>
-        <tr><td>0</td><td>3</td><td>0,6366</td><td>1,9099</td></tr>
-        <tr><td>2</td><td>−3</td><td>−0,2122</td><td>0,6366</td></tr>
-        <tr><td>−2</td><td>−3</td><td>0,1273</td><td>−0,3820</td></tr>
+        <tr><th>\(k\)</th><th>\(3\cos(\tfrac{\pi k}{2})\)</th><th>\(x[k]\)</th></tr>
+        <tr><td>0</td><td>\(3\cos(0)\)</td><td>3</td></tr>
+        <tr><td>1</td><td>\(3\cos(\tfrac{\pi}{2})\)</td><td>0</td></tr>
+        <tr><td>2</td><td>\(3\cos(\pi)\)</td><td>−3</td></tr>
+        <tr><td>−1</td><td>\(3\cos(-\tfrac{\pi}{2})\)</td><td>0</td></tr>
+        <tr><td>−2</td><td>\(3\cos(-\pi)\)</td><td>−3</td></tr>
       </table>
     </div>
     <div class="fragment">
-      <p><strong>Sumando más términos:</strong></p>
+      <p><strong>Argumento de la sinc,</strong> con \(t=\tfrac18\) y \(T_s=\tfrac14\):</p>
+      $$\frac{t-kT_s}{T_s}=\frac{\tfrac18-\tfrac{k}{4}}{\tfrac14}=\tfrac12-k$$
+      <p>La fórmula de Whittaker-Shannon queda:</p>
+      <div class="caja">
+        $$x_r(\tfrac18)=\sum_k x[k]\,\mathrm{sinc}(\tfrac12-k)$$
+      </div>
+      <p>Con \(k\) impar, \(x[k]=0\): solo cuentan los \(k\) pares.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · EJEMPLO 2/3 -->
+<section>
+  <h2><small>Ejemplo numérico · 2 de 3</small>Calcular cada término</h2>
+  <p>Usamos \(\mathrm{sinc}(u)=\dfrac{\sin(\pi u)}{\pi u}\) y multiplicamos por la muestra \(x[k]\).</p>
+  <div class="tarjetas fila">
+    <div class="tarjeta naranja fragment">
+      <h3>\(k=0\), \(x[0]=3\)</h3>
+      $$\mathrm{sinc}(0{,}5)=\frac{\sin(0{,}5\pi)}{0{,}5\pi}=\frac{1}{0{,}5\pi}\approx0{,}6366$$
+      $$3\cdot0{,}6366=\mathbf{1{,}9099}$$
+    </div>
+    <div class="tarjeta fragment">
+      <h3>\(k=2\), \(x[2]=-3\)</h3>
+      $$\mathrm{sinc}(-1{,}5)=\frac{\sin(-1{,}5\pi)}{-1{,}5\pi}=\frac{1}{-1{,}5\pi}\approx-0{,}2122$$
+      $$(-3)(-0{,}2122)=\mathbf{0{,}6366}$$
+    </div>
+    <div class="tarjeta verde fragment">
+      <h3>\(k=-2\), \(x[-2]=-3\)</h3>
+      $$\mathrm{sinc}(2{,}5)=\frac{\sin(2{,}5\pi)}{2{,}5\pi}=\frac{1}{2{,}5\pi}\approx0{,}1273$$
+      $$(-3)(0{,}1273)=\mathbf{-0{,}3820}$$
+    </div>
+  </div>
+</section>
+
+<!-- 8 · EJEMPLO 3/3 -->
+<section>
+  <h2><small>Ejemplo numérico · 3 de 3</small>Suma y comparación con el valor exacto</h2>
+  <div class="cols">
+    <div>
+      <p><strong>Sumando hasta \(|k|\le2\):</strong></p>
+      $$x_r(\tfrac18)\approx1{,}9099+0{,}6366-0{,}3820=\mathbf{2{,}1645}$$
+      <p class="fragment"><strong>Valor exacto,</strong> evaluando \(x(t)\) en \(t=\tfrac18\):</p>
+      <div class="caja caja-verde fragment">
+        $$x(\tfrac18)=3\cos\!\left(2\pi\cdot\tfrac18\right)=3\cos\!\left(\tfrac{\pi}{4}\right)=3\cdot\tfrac{\sqrt2}{2}\approx\mathbf{2{,}1213}$$
+      </div>
+    </div>
+    <div class="fragment">
+      <p><strong>Sumando más términos pares:</strong></p>
       <table>
         <tr><th>\(|k|\le\)</th><th>0</th><th>2</th><th>4</th><th>10</th><th>100</th></tr>
         <tr><td>\(x_r(\tfrac18)\)</td><td>1,910</td><td>2,165</td><td>2,104</td><td>2,125</td><td>2,121</td></tr>
       </table>
-      <div class="caja caja-verde">Exacto: \(3\cos(\tfrac{\pi}{4})=2{,}1213\). La suma converge a él.</div>
+      <p>Las oscilaciones se cancelan y la suma <strong>converge a 2,1213</strong>.</p>
     </div>
   </div>
 </section>
@@ -183,18 +233,38 @@
   <p class="fragment" style="color:var(--gris)">Pista: primero halla \(B\) y \(f_s\).</p>
 </section>
 
-<!-- 12 · SOLUCION -->
+<!-- 12 · SOLUCION 1/2 -->
 <section>
-  <h2><small>Ejercicio · solución</small>Verificar condiciones y escribir \(H(f)\)</h2>
+  <h2><small>Ejercicio · solución 1 de 2</small>Verificar las condiciones</h2>
+  <p>Datos: \(x(t)=4\cos(\pi t)\) y \(T_s=\tfrac12\) s.</p>
   <div class="cols">
     <div>
-      <p class="fragment"><strong>1.</strong> Banda limitada: una sola frecuencia \(f_0=\tfrac{\pi}{2\pi}=0{,}5\) Hz, luego \(B=0{,}5\) Hz. ✓</p>
-      <p class="fragment"><strong>2.</strong> \(f_s=\tfrac{1}{T_s}=2\) Hz \(>2B=1\) Hz. ✓</p>
-      <p class="fragment"><strong>3.</strong> Se usan todas las muestras (suma infinita). ✓</p>
+      <p><strong>1. Banda limitada.</strong> Comparamos con \(x(t)=4\cos(2\pi f_0t)\):</p>
+      $$2\pi f_0=\pi\;\Rightarrow\;f_0=\frac{\pi}{2\pi}=0{,}5\ \text{Hz}$$
+      <p class="fragment">Una sola frecuencia, luego \(B=0{,}5\) Hz. <strong>✓</strong></p>
+    </div>
+    <div class="fragment">
+      <p><strong>2. Muestreo suficiente.</strong></p>
+      $$f_s=\frac{1}{T_s}=\frac{1}{1/2}=2\ \text{Hz}$$
+      $$2B=2(0{,}5)=1\ \text{Hz}$$
+      <div class="caja caja-verde">\(f_s=2>2B=1\) <strong>✓</strong> Cumple.</div>
+    </div>
+  </div>
+  <p class="fragment">3. Se usan todas las muestras (suma infinita). <strong>✓</strong></p>
+</section>
+
+<!-- 13 · SOLUCION 2/2 -->
+<section>
+  <h2><small>Ejercicio · solución 2 de 2</small>Escribir \(H(f)\)</h2>
+  <div class="cols">
+    <div>
+      <p>Fórmula del filtro ideal:</p>
+      $$H(f)=T_s\,\mathrm{rect}_{f_s}(f)$$
+      <p class="fragment">Reemplazamos \(T_s=\tfrac12\) y \(f_s=2\):</p>
       <div class="caja caja-verde fragment">
-        $$H(f)=T_s\,\mathrm{rect}_{f_s}(f)=\begin{cases}\tfrac12, & |f|\lt1\\[2pt] 0, & \text{en otro caso}\end{cases}$$
+        $$H(f)=\tfrac12\,\mathrm{rect}_2(f)=\begin{cases}\tfrac12, & |f|\lt1\\[2pt] 0, & \text{en otro caso}\end{cases}$$
       </div>
-      <p class="fragment">Deja pasar solo \(\pm0{,}5\) Hz y elimina las réplicas, por eso \(x_r(t)=x(t)\).</p>
+      <p class="fragment">Con \(f_s/2=1\) Hz, el filtro deja pasar solo \(\pm0{,}5\) Hz y elimina las réplicas, por eso \(x_r(t)=x(t)\).</p>
     </div>
     <div class="graf fragment" data-g="ejercicio-esp"></div>
   </div>

@@ -197,3 +197,9 @@ body, .reveal-viewport { background: var(--bg); }
 .sw.dash { width: 26px; height: 0; border-top: 4px dashed var(--c); }
 .sw.punto { width: 12px; height: 12px; border-radius: 50%; background: var(--c); }
 .sw.caja { width: 18px; height: 14px; border-radius: 3px; background: var(--c); opacity: .7; }
+/* tarjetas en fila: cada término del ejemplo en una línea */
+.tarjetas.fila { grid-template-columns: 1fr; gap: 14px; }
+.tarjetas.fila .tarjeta { display: flex; align-items: center; gap: 26px; padding: 10px 22px; }
+.tarjetas.fila .tarjeta h3 { flex: 0 0 250px; white-space: nowrap; margin: 0; }
+.tarjetas.fila .katex-display { margin: 0; }
+.tarjetas.fila .katex-display > .katex { font-size: 1.05em; }
